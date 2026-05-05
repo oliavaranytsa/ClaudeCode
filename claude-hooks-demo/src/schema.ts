@@ -1,3 +1,5 @@
+// test hook
+// Database schema
 import { Database } from "sqlite3";
 
 export async function createSchema(db: Database, verbose: boolean) {
