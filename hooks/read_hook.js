@@ -11,13 +11,16 @@ rl.on("close", () => {
   const data = JSON.parse(input);
   const filePath = data?.tool_input?.file_path ?? "";
 
-  if (filePath.endsWith(".env") || filePath.match(/(^|\/)\.env(\.|$)/)) {
+  const isEnv = filePath.endsWith(".env") || filePath.match(/(^|\/)\.env(\.|$)/);
+  const isSensitive = isEnv || filePath.endsWith(".pem") || filePath.endsWith(".key");
+
+  if (isSensitive) {
     console.log(
       JSON.stringify({
         hookSpecificOutput: {
           hookEventName: "PreToolUse",
           permissionDecision: "deny",
-          permissionDecisionReason: ".env files are protected",
+          permissionDecisionReason: "sensitive files are protected",
         },
       })
     );
