@@ -1,0 +1,66 @@
+name: Claude with Playwright MCP
+
+on:
+  issues:
+    types: [opened, assigned]
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-playwright:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Playwright system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 \
+            libgbm1 libasound2t64 libxrandr2 libxcomposite1 \
+            libxdamage1 libxfixes3 libxss1 libxtst6 libpango-1.0-0 \
+            libcairo-gobject2 libgdk-pixbuf-2.0-0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright MCP server
+        run: npm install -g @playwright/mcp@latest
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run Claude with Playwright MCP
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mcp_config: |
+            {
+              "mcpServers": {
+                "playwright": {
+                  "command": "npx",
+                  "args": ["@playwright/mcp@latest", "--headless"],
+                  "env": {
+                    "DISPLAY": ""
+                  }
+                }
+              }
+            }
+          allowed_tools: |
+            mcp__playwright__browser_navigate
+            mcp__playwright__browser_take_screenshot
+            mcp__playwright__browser_snapshot
+            mcp__playwright__browser_click
+            mcp__playwright__browser_type
+            mcp__playwright__browser_wait_for
+            mcp__playwright__browser_close
