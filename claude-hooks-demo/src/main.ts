@@ -1,4 +1,3 @@
-// entry point
 import sqlite3 from "sqlite3";
 import { createSchema } from "./schema";
 
